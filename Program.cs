@@ -17,7 +17,7 @@ public class Program
         Console.WriteLine("  1. Black Jack");
         Console.WriteLine("  2. Poker");
         Console.WriteLine("  3. Go Fish");
-        Console.WriteLine("  4. War");
+        Console.WriteLine("  4. War");//war is a pretty bad game to play against bot, very boring.
     }
     public static void GameSelect()
     {
@@ -42,11 +42,6 @@ public class Program
                 GameSelect();
                 break;
         }
-    }
-    public static void CardGenerator()
-    {
-        //TODO: Implement card generator logic here
-        //      used by 1 game in GameSelect
     }
     public static void BlackJack()
     {
