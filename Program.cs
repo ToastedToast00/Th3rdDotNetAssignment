@@ -1,17 +1,20 @@
 ﻿using ConsoleApp1;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using System.Security.Cryptography.X509Certificates;
 
 public class Program
 {
     public static void Main(string[] args)
     {
-        GameSelect();
         Console.WriteLine("This Program allows the user to play a card game");
         Console.WriteLine("Enter 5 to stop");
+        GameSelect();
+
     }
-    public static void Instructions() 
+    public static void Instructions()
     {
         Console.WriteLine("please select a game to play");
         Console.WriteLine();
@@ -25,7 +28,7 @@ public class Program
     {
         Instructions();
         string? input = Console.ReadLine();
-        switch (input) 
+        switch (input)
         {
             case "1":
                 BlackJack();
@@ -49,7 +52,7 @@ public class Program
         }
     }
 
-    public static void PlayAgain() 
+    public static void PlayAgain()
     {
         string playAgain = Console.ReadLine();
 
@@ -109,7 +112,7 @@ public class Program
         {
             dealerScore += DrawCardValue(deck);
         }
-        
+
         Console.WriteLine($"Your total: {playerScore}, Dealer total: {dealerScore}");
         //Win Handling
         if (playerScore > 21)
@@ -144,8 +147,72 @@ public class Program
     {
         //TODO: using CardGenerator() play a game of poker
     }
-    public static void GoFish() 
+    public static void GoFish()
     {
-        //TODO: using CardGenerator() play a game of Go Fish
+        var deck = CardDeck.GenerateDeck();
+        var playerhand = new List<string>();
+        var computerhand = new List<string>();
+
+        // deal intial hand (5 cards each)
+        for (int i = 0; i < 5; i++)
+        {
+            playerhand.Add(deck[0]);
+            deck.RemoveAt(0);
+            computerhand.Add(deck[0]);
+            deck.RemoveAt(0);
+        }
+
+        while (deck.Count > 0 && playerhand.Count > 0 && computerhand.Count > 0)
+        {
+            Console.WriteLine("\nYour hand:");
+            foreach (var card in playerhand)
+            {
+                Console.Write(" " + card);
+            }
+            Console.WriteLine();
+
+            Console.Write("\nAsk for a rank (e.g. 'ace', '7', 'King')");
+            string? rank = Console.ReadLine()?.ToLower();
+
+            var matching = computerhand.Where(c => c.StartsWith(rank));
+            if (matching.Count() > 0)
+            {
+                Console.WriteLine($"Bot gives you {matching.Count()} card(s) with rank {rank}");
+                foreach (var card in matching)
+                {
+                    playerhand.Add(card);
+                    computerhand.Remove(card);
+                }
+            }
+            else
+            {
+                Console.WriteLine("Go Fish! Drawing a card from the deck.");
+                if (deck.Count > 0)
+                {
+                    playerhand.Add(deck[0]);
+                    deck.RemoveAt(0);
+                }
+            }
+
+            //TODO: actually make the game work
+        }
+    }
+    public static void CollectPairs(List<string> hand, List<string> pairs)
+    {
+        var grouped = hand.GroupBy(c => c.Split(' ')[0])
+                          .Where(g => g.Count() >= 2);
+
+        foreach (var group in grouped)
+        {
+            int count = group.Count();
+            int pairsToRemove = count - (count % 2); // Remove pairs of cards
+
+            for (int i = 0; i < pairsToRemove; i++)
+            {
+                var card = hand.First(c => c.StartsWith(group.Key));
+                hand.Remove(card);
+                pairs.Add(card); // Add the removed card to the pairs list
+            }
+        }
     }
 }
