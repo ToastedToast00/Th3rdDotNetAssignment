@@ -142,8 +142,95 @@ public class Program
 
     public static void Poker()
     {
-        //TODO: using CardGenerator() play a game of poker
+        var deck = CardDeck.GenerateDeck();
+        var playerHand = new List<string>();
+        var botHand = new List<string>();
+
+        // Deal initial hands
+        for (int i = 0; i < 5; i++)
+        {
+            playerHand.Add(deck[0]);
+            deck.RemoveAt(0);
+            botHand.Add(deck[0]);
+            deck.RemoveAt(0);
+        }
+
+        Console.WriteLine("\nYour hand:");
+        for (int i = 0; i < playerHand.Count; i++)
+        {
+            Console.WriteLine($"{i + 1}. {playerHand[i]}");
+        }
+
+        Console.WriteLine("\nEnter the numbers of the cards you want to discard (space-separated, max 3), or press Enter to keep all:");
+        string? discardInput = Console.ReadLine();
+        var indicesToDiscard = new List<int>();
+
+        if (!string.IsNullOrWhiteSpace(discardInput))
+        {
+            var entries = discardInput.Split(' ');
+            foreach (var entry in entries)
+            {
+                if (int.TryParse(entry, out int index) && index >= 1 && index <= 5)
+                {
+                    indicesToDiscard.Add(index - 1);
+                }
+            }
+        }
+
+        // Replace discarded cards
+        indicesToDiscard.Sort((a, b) => b.CompareTo(a)); // remove from highest to avoid shifting indexes
+        foreach (int index in indicesToDiscard)
+        {
+            playerHand.RemoveAt(index);
+        }
+
+        for (int i = playerHand.Count; i < 5 && deck.Count > 0; i++)
+        {
+            playerHand.Add(deck[0]);
+            deck.RemoveAt(0);
+        }
+
+        Console.WriteLine("\nYour final hand:");
+        foreach (var card in playerHand)
+        {
+            Console.WriteLine(card);
+        }
+
+        Console.WriteLine("\nBot's hand:");
+        foreach (var card in botHand)
+        {
+            Console.WriteLine(card);
+        }
+
+        // Simple evaluation: count highest rank value
+        int playerScore = PokerEvaluate(playerHand);
+        int botScore = PokerEvaluate(botHand);
+
+        Console.WriteLine($"\nScore — You: {playerScore} | Bot: {botScore}");
+
+        if (playerScore > botScore)
+            Console.WriteLine("You win!");
+        else if (botScore > playerScore)
+            Console.WriteLine("Bot wins!");
+        else
+            Console.WriteLine("It's a tie.");
+
+        Console.WriteLine("\nPlay again? y/n");
+        PlayAgain();
+
     }
+    public static int PokerEvaluate(List<string> hand)
+    {
+        var rankValues = new Dictionary<string, int>
+    {
+        { "2", 2 }, { "3", 3 }, { "4", 4 }, { "5", 5 }, { "6", 6 },
+        { "7", 7 }, { "8", 8 }, { "9", 9 }, { "10", 10 },
+        { "Jack", 11 }, { "Queen", 12 }, { "King", 13 }, { "Ace", 14 }
+    };
+
+        return hand.Select(card => rankValues[card.Split(' ')[0]]).Max();
+    }
+
     public static void GoFish() 
     {
         //TODO: using CardGenerator() play a game of Go Fish
